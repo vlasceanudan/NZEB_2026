@@ -117,7 +117,7 @@
   <div class="logo" aria-label="buildingSMART Romania">__LOGO__</div>
   <div class="title">
     <h1>NZEB Expo 2026</h1>
-    <p>Dashboard Pavilion B2 — Romexpo, București · 199 expozanți</p>
+    <p>Dashboard Pavilion B2 — Romexpo, București</p>
   </div>
   <div class="slogan">in openBIM we trust.</div>
 </header>
@@ -175,7 +175,6 @@
           <span class="chip" data-view="2d">Plan 2D</span>
         </div>
         <button id="gotoBsroBtn" title="Zboară la standul F15 - buildingSMART România">⌖ Zoom la buildingSMART RO</button>
-        <span style="font-size:11px;color:var(--bs-muted)" id="mapHint">drag = orbită · click dr. = pan · scroll = zoom · click = detalii</span>
         <div class="mode chips">
           <span class="chip on" data-mode="ifc">Culori: IFC</span>
           <span class="chip" data-mode="cat">Domenii</span>
@@ -184,7 +183,6 @@
       </div>
       <div class="chips" style="margin-bottom:8px" id="layerChips">
         <span class="chip on" data-layer="building">Pavilion</span>
-        <span class="chip" data-layer="roof">Acoperiș</span>
         <span class="chip on" data-layer="space">Zone speciale</span>
       </div>
       <div id="mapwrap">
@@ -576,9 +574,6 @@ document.querySelectorAll('#viewChips .chip').forEach(c=>{
     const is3d = F.view==='3d';
     renderer.domElement.style.display = is3d ? '' : 'none';
     map.style.display = is3d ? 'none' : '';
-    document.getElementById('mapHint').textContent = is3d
-      ? 'drag = orbită · click dr. = pan · scroll = zoom · click = detalii'
-      : 'scroll = zoom · drag = pan · click = detalii';
     tip.style.display='none';
     requestRender();
   };
