@@ -4,6 +4,8 @@ Model IFC al pavilionului B2 de la Romexpo pentru **NZEB Expo București 2026** 
 
 > *in openBIM we trust.*
 
+**🔴 Dashboard live:** <https://vlasceanudan.github.io/NZEB_2026/>
+
 ## Conținut
 
 | Fișier | Descriere |
