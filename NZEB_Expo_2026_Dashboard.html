@@ -1920,19 +1920,34 @@ function init3D(){
     } else layerGroups[prod.kind].add(mesh);
   });
 
-  // marker F15 (sprite buildingSMART RO)
+  // marker F15 - pin de locatie "Ești aici"
   const f15 = DATA.stands.find(s=>s.f15);
   if(f15){
-    const cv = document.createElement('canvas'); cv.width=512; cv.height=128;
-    const cx2 = cv.getContext('2d');
-    cx2.fillStyle='rgba(6,18,43,.92)'; cx2.beginPath();
-    cx2.roundRect(4,4,504,86,18); cx2.fill();
-    cx2.strokeStyle='#29abe2'; cx2.lineWidth=5; cx2.stroke();
-    cx2.fillStyle='#29abe2'; cx2.font='bold 52px Segoe UI';
-    cx2.textAlign='center'; cx2.fillText('▼ buildingSMART RO', 256, 64);
-    const sp = new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(cv), depthTest:false}));
-    sp.scale.set(16, 4, 1); sp.renderOrder = 999;
-    sp.position.copy(ifcToWorld(f15.x+f15.w/2, f15.y+f15.d/2, 7.2));
+    const W=320, H=372, cv=document.createElement('canvas'); cv.width=W; cv.height=H;
+    const g=cv.getContext('2d'); g.textAlign='center'; g.textBaseline='middle';
+    const cx=W/2, r=80, pillH=64, cy=6+pillH+10+r;   // capsula -> bula, lipite
+    // eticheta "Ești aici"
+    const label='Ești aici'; g.font='bold 42px Segoe UI';
+    const pillW=g.measureText(label).width+52, pillX=(W-pillW)/2;
+    g.fillStyle='rgba(6,18,43,.96)'; g.beginPath(); g.roundRect(pillX,6,pillW,pillH,32); g.fill();
+    g.lineWidth=4; g.strokeStyle='#3da4b0'; g.stroke();
+    g.fillStyle='#eef1fa'; g.fillText(label, W/2, 6+pillH/2+2);
+    // pin teardrop (gradient buildingSMART)
+    g.shadowColor='rgba(0,0,0,.55)'; g.shadowBlur=16; g.shadowOffsetY=7;
+    const grad=g.createLinearGradient(cx-r,cy-r,cx+r,cy+r);
+    grad.addColorStop(0,'#3da4b0'); grad.addColorStop(.55,'#2556ac'); grad.addColorStop(1,'#962999');
+    g.fillStyle=grad;
+    g.beginPath(); g.arc(cx,cy,r,0,Math.PI*2); g.fill();
+    g.beginPath(); g.moveTo(cx-r*0.72,cy+r*0.70); g.lineTo(cx+r*0.72,cy+r*0.70);
+    g.lineTo(cx,cy+r+118); g.closePath(); g.fill();
+    g.shadowColor='transparent'; g.shadowBlur=0; g.shadowOffsetY=0;
+    // disc interior alb + eticheta stand
+    g.fillStyle='#fff'; g.beginPath(); g.arc(cx,cy,r*0.52,0,Math.PI*2); g.fill();
+    g.fillStyle='#962999'; g.font='bold 46px Segoe UI'; g.fillText('F15', cx, cy+3);
+    const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(cv), depthTest:false}));
+    const ph=9; sp.scale.set(ph*W/H, ph, 1); sp.center.set(0.5, 0);  // varful pinului = punctul de ancorare
+    sp.renderOrder=999;
+    sp.position.copy(ifcToWorld(f15.x+f15.w/2, f15.y+f15.d/2, 4.4));
     scene.add(sp); sp.userData.f15marker = true;
   }
 
