@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NZEB Expo 2026 — Dashboard Pavilion B2 | buildingSMART România</title>
+<style>
+  :root{
+    /* culori oficiale buildingSMART (CMYK->RGB din logo) */
+    --bs-navy:#0e1530; --bs-navy2:#15204a; --bs-panel:#1a2550; --bs-panel2:#212e61;
+    --bs-cyan:#3da4b0; --bs-blue:#2556ac; --bs-red:#ec124e; --bs-magenta:#962999; --bs-purple:#7d2e9e;
+    --bs-text:#eef1fa; --bs-muted:#9aa6cc; --bs-line:#2c3a72;
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  body{background:var(--bs-navy); color:var(--bs-text); font-family:"Segoe UI",system-ui,sans-serif; min-height:100vh}
+  header{display:flex; align-items:center; gap:16px; padding:14px 22px; background:linear-gradient(90deg,var(--bs-navy2),var(--bs-navy)); border-bottom:2px solid var(--bs-line); position:sticky; top:0; z-index:50}
+  header .logo svg{height:44px; width:auto; display:block}
+  header .title{border-left:1px solid var(--bs-line); padding-left:16px}
+  header .title h1{font-size:19px; font-weight:600; letter-spacing:.3px}
+  header .title p{font-size:12px; color:var(--bs-muted)}
+  header .slogan{margin-left:auto; font-size:13px; color:var(--bs-cyan); font-style:italic; white-space:nowrap}
+  .layout{display:grid; grid-template-columns:295px 1fr; gap:14px; padding:14px 18px; align-items:start}
+  .side{position:sticky; top:78px; display:flex; flex-direction:column; gap:14px; max-height:calc(100vh - 92px)}
+  .side .filters{overflow-y:auto; min-height:0}
+  .card{background:var(--bs-panel); border:1px solid var(--bs-line); border-radius:10px; padding:14px}
+  /* card standul nostru */
+  .bsro{background:linear-gradient(145deg,#1a2550 0%,#251a4e 100%); border:1px solid var(--bs-magenta); flex:none}
+  .bsro .head{display:flex; align-items:center; gap:10px; margin-bottom:9px}
+  .bsro .head svg{height:26px; width:auto}
+  .bsro h4{font-size:13px; font-weight:700}
+  .bsro p{font-size:11.5px; color:var(--bs-muted); line-height:1.45; margin-bottom:10px}
+  .bsro .actions{display:flex; gap:7px}
+  .bsro .actions a, .bsro .actions button{flex:1; text-align:center; padding:7px 4px; border-radius:7px; font-size:11.5px;
+    font-weight:700; cursor:pointer; border:none; text-decoration:none}
+  .bsro .actions button{background:linear-gradient(90deg,var(--bs-cyan),var(--bs-magenta)); color:#fff}
+  .bsro .actions a{background:transparent; border:1px solid var(--bs-cyan); color:var(--bs-cyan)}
+  .bsro .actions a:hover, .bsro .actions button:hover{filter:brightness(1.18)}
+  .filters h3{font-size:12px; text-transform:uppercase; letter-spacing:1px; color:var(--bs-muted); margin:14px 0 7px}
+  .filters h3:first-child{margin-top:0}
+  #search{width:100%; padding:8px 10px; border-radius:7px; border:1px solid var(--bs-line); background:var(--bs-navy); color:var(--bs-text); font-size:13px; outline:none}
+  #search:focus{border-color:var(--bs-cyan)}
+  .chips{display:flex; flex-wrap:wrap; gap:5px}
+  .chip{padding:4px 9px; border-radius:999px; border:1px solid var(--bs-line); background:var(--bs-navy); color:var(--bs-muted); font-size:11.5px; cursor:pointer; user-select:none; transition:.13s}
+  .chip:hover{border-color:var(--bs-cyan); color:var(--bs-text)}
+  .chip.on{background:var(--bs-cyan); border-color:var(--bs-cyan); color:#06223a; font-weight:600}
+  .catlist{max-height:230px; overflow-y:auto; display:flex; flex-direction:column; gap:3px; padding-right:4px}
+  .catrow{display:flex; align-items:center; gap:7px; padding:4px 7px; border-radius:6px; font-size:12px; cursor:pointer; color:var(--bs-muted)}
+  .catrow:hover{background:var(--bs-navy2); color:var(--bs-text)}
+  .catrow.on{background:var(--bs-navy2); color:var(--bs-text); outline:1px solid var(--bs-line)}
+  .catrow .dot{width:10px; height:10px; border-radius:3px; flex:none}
+  .catrow .n{margin-left:auto; font-size:11px; color:var(--bs-muted)}
+  .reset{margin-top:14px; width:100%; padding:8px; border-radius:7px; border:1px solid var(--bs-red); background:transparent; color:var(--bs-red); font-size:12.5px; cursor:pointer}
+  .reset:hover{background:var(--bs-red); color:#fff}
+  .kpis{display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin-bottom:12px}
+  .kpi{background:var(--bs-panel); border:1px solid var(--bs-line); border-radius:10px; padding:10px 14px}
+  .kpi .v{font-size:22px; font-weight:700}
+  .kpi .l{font-size:11px; color:var(--bs-muted); text-transform:uppercase; letter-spacing:.6px}
+  .kpi:nth-child(1) .v{color:var(--bs-cyan)} .kpi:nth-child(2) .v{color:var(--bs-magenta)}
+  .kpi:nth-child(3) .v{color:var(--bs-red)} .kpi:nth-child(4) .v{color:var(--bs-purple); font-size:18px}
+  .kpi:nth-child(5) .v{color:#5dd39e}
+  .maphead{display:flex; align-items:center; gap:10px; margin-bottom:8px}
+  .maphead b{font-size:14px}
+  .maphead .mode{margin-left:auto; display:flex; gap:5px}
+  #gotoBsroBtn{padding:5px 12px; border-radius:999px; border:none; cursor:pointer; font-size:12px; font-weight:700;
+    background:linear-gradient(90deg,var(--bs-cyan),var(--bs-magenta)); color:#fff; letter-spacing:.2px}
+  #gotoBsroBtn:hover{filter:brightness(1.18)}
+  #mapwrap{position:relative; overflow:hidden; border-radius:8px; background:var(--bs-navy); border:1px solid var(--bs-line); height:460px; cursor:grab}
+  #mapwrap:active{cursor:grabbing}
+  svg text{pointer-events:none}
+  .stand{stroke:#0a0f24; stroke-width:.25; cursor:pointer; transition:opacity .15s}
+  .stand.dim{opacity:.13; cursor:default}
+  .stand.sel{stroke:#fff; stroke-width:.7}
+  #tooltip{position:absolute; pointer-events:none; background:#06122b; border:1px solid var(--bs-cyan); border-radius:7px; padding:7px 11px; font-size:12px; display:none; z-index:20; max-width:260px; box-shadow:0 4px 18px rgba(0,0,0,.5)}
+  #tooltip b{color:var(--bs-cyan)}
+  .bottom{display:grid; grid-template-columns:1.05fr 1.6fr; gap:14px; margin-top:14px; align-items:stretch}
+  .bottom .card{display:flex; flex-direction:column; height:520px; min-height:0}
+  #barChart{flex:1; overflow-y:auto; min-height:0; padding-right:4px}
+  .bars .row{display:grid; grid-template-columns:170px 1fr 34px; gap:8px; align-items:center; font-size:11.5px; margin-bottom:4px; cursor:pointer; color:var(--bs-muted)}
+  .bars .row:hover{color:var(--bs-text)}
+  .bars .bar{height:13px; border-radius:3px; min-width:2px}
+  .bars .lab{overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:right}
+  table{width:100%; border-collapse:collapse; font-size:12.5px}
+  th{text-align:left; padding:7px 9px; color:var(--bs-muted); font-size:11px; text-transform:uppercase; letter-spacing:.5px; cursor:pointer; border-bottom:1px solid var(--bs-line); user-select:none; white-space:nowrap}
+  th:hover{color:var(--bs-cyan)}
+  td{padding:6px 9px; border-bottom:1px solid #20294f}
+  tbody tr{cursor:pointer}
+  tbody tr:hover{background:var(--bs-navy2)}
+  tbody tr.sel{background:var(--bs-panel2); outline:1px solid var(--bs-cyan)}
+  td a{color:var(--bs-cyan); text-decoration:none}
+  td a:hover{text-decoration:underline}
+  .tablewrap{flex:1; min-height:0; overflow-y:auto}
+  #detail{position:fixed; right:-380px; top:0; width:370px; height:100vh; background:var(--bs-navy2); border-left:2px solid var(--bs-line); z-index:100; transition:right .25s ease; padding:20px; overflow-y:auto; box-shadow:-8px 0 30px rgba(0,0,0,.45)}
+  #detail.open{right:0}
+  #detail .close{position:absolute; top:12px; right:14px; background:none; border:none; color:var(--bs-muted); font-size:22px; cursor:pointer}
+  #detail .close:hover{color:var(--bs-red)}
+  #detail h2{font-size:17px; margin:4px 0 2px; padding-right:24px}
+  #detail .sub{color:var(--bs-cyan); font-size:13px; margin-bottom:14px}
+  .prop{display:flex; justify-content:space-between; gap:10px; padding:7px 0; border-bottom:1px solid var(--bs-line); font-size:13px}
+  .prop .k{color:var(--bs-muted); flex:none}
+  .prop .v{text-align:right; word-break:break-word}
+  .prop .v a{color:var(--bs-cyan)}
+  #detail .els{margin-top:13px}
+  #detail .els h4{font-size:12px; color:var(--bs-muted); text-transform:uppercase; letter-spacing:.7px; margin-bottom:7px}
+  #detail .els li{font-size:12.5px; padding:4px 0 4px 6px; border-left:2px solid var(--bs-magenta); margin-bottom:3px; list-style:none}
+  .badge-f15{display:inline-block; background:linear-gradient(90deg,var(--bs-cyan),var(--bs-magenta)); color:#fff; font-size:10px; font-weight:700; padding:2px 8px; border-radius:999px; margin-left:6px; vertical-align:2px}
+  footer{display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;
+    border-top:1px solid var(--bs-line); margin-top:8px; padding:13px 22px 16px; color:var(--bs-muted); font-size:11.5px}
+  footer .fslogan{color:var(--bs-cyan); font-style:italic}
+  ::-webkit-scrollbar{width:9px; height:9px} ::-webkit-scrollbar-thumb{background:var(--bs-line); border-radius:5px}
+  @media (max-width:1100px){ .layout{grid-template-columns:1fr} .side{position:static; max-height:none}
+    .kpis{grid-template-columns:repeat(2,1fr)} .bottom{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+<header>
+  <!-- logo oficial buildingSMART Romania -->
+  <div class="logo" aria-label="buildingSMART Romania">__LOGO__</div>
+  <div class="title">
+    <h1>NZEB Expo 2026</h1>
+    <p>Dashboard Pavilion B2 — Romexpo, București · 199 expozanți</p>
+  </div>
+  <div class="slogan">in openBIM we trust.</div>
+</header>
+
+<div class="layout">
+  <div class="side">
+  <!-- ================= FILTERS ================= -->
+  <div class="card filters">
+    <h3>Căutare</h3>
+    <input id="search" type="text" placeholder="Companie sau nr. stand (ex: F15)...">
+    <h3>Zone</h3>
+    <div class="chips" id="zoneChips"></div>
+    <h3>Amplasare</h3>
+    <div class="chips" id="locChips">
+      <span class="chip on" data-loc="all">Toate</span>
+      <span class="chip" data-loc="in">Interior</span>
+      <span class="chip" data-loc="out">Exterior</span>
+    </div>
+    <h3>Altele</h3>
+    <div class="chips">
+      <span class="chip" id="webChip">Doar cu website</span>
+    </div>
+    <h3>Clasificare (domenii)</h3>
+    <div class="catlist" id="catList"></div>
+    <button class="reset" id="resetBtn">✕ Resetează filtrele</button>
+  </div>
+
+  <!-- ================= CARD STANDUL NOSTRU ================= -->
+  <div class="card bsro">
+    <div class="head">__LOGO__</div>
+    <h4>Standul nostru · F15</h4>
+    <p>buildingSMART România te așteaptă în Zona 3 — 28 mp dedicați openBIM, IFC și certificării profesionale. <i>in openBIM we trust.</i></p>
+    <div class="actions">
+      <button onclick="gotoBsro()">⌖ Vezi standul</button>
+      <a href="https://buildingsmartromania.org/" target="_blank" rel="noopener">Website</a>
+    </div>
+  </div>
+  </div><!-- /side -->
+
+  <!-- ================= MAIN ================= -->
+  <div>
+    <div class="kpis">
+      <div class="kpi"><div class="v" id="kStands">–</div><div class="l">Standuri afișate</div></div>
+      <div class="kpi"><div class="v" id="kArea">–</div><div class="l">mp expoziționali</div></div>
+      <div class="kpi"><div class="v" id="kCats">–</div><div class="l">Domenii</div></div>
+      <div class="kpi"><div class="v" id="kBig">–</div><div class="l">Cel mai mare stand</div></div>
+      <div class="kpi"><div class="v" id="kWeb">–</div><div class="l">Cu website</div></div>
+    </div>
+
+    <div class="card">
+      <div class="maphead">
+        <b>Model pavilion (IFC)</b>
+        <div class="chips" id="viewChips">
+          <span class="chip on" data-view="3d">Vedere 3D</span>
+          <span class="chip" data-view="2d">Plan 2D</span>
+        </div>
+        <button id="gotoBsroBtn" title="Zboară la standul F15 - buildingSMART România">⌖ Zoom la buildingSMART RO</button>
+        <span style="font-size:11px;color:var(--bs-muted)" id="mapHint">drag = orbită · click dr. = pan · scroll = zoom · click = detalii</span>
+        <div class="mode chips">
+          <span class="chip on" data-mode="ifc">Culori: IFC</span>
+          <span class="chip" data-mode="cat">Domenii</span>
+          <span class="chip" data-mode="zone">Zone</span>
+        </div>
+      </div>
+      <div class="chips" style="margin-bottom:8px" id="layerChips">
+        <span class="chip on" data-layer="building">Pavilion</span>
+        <span class="chip" data-layer="roof">Acoperiș</span>
+        <span class="chip on" data-layer="space">Zone speciale</span>
+      </div>
+      <div id="mapwrap">
+        <svg id="map" width="100%" height="100%" style="display:none"></svg>
+        <div id="tooltip"></div>
+      </div>
+    </div>
+
+    <div class="bottom">
+      <div class="card bars">
+        <b style="font-size:14px">Expozanți pe domenii</b>
+        <div style="font-size:11px;color:var(--bs-muted);margin-bottom:10px">click pe un domeniu pentru filtrare</div>
+        <div id="barChart"></div>
+      </div>
+      <div class="card">
+        <b style="font-size:14px">Listă expozanți</b>
+        <div class="tablewrap" style="margin-top:8px">
+          <table>
+            <thead><tr>
+              <th data-s="id">Stand</th><th data-s="name">Companie</th><th data-s="zone">Zonă</th>
+              <th data-s="cat">Domeniu</th><th data-s="area">mp</th><th>Web</th>
+            </tr></thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= DETAIL DRAWER ================= -->
+<div id="detail">
+  <button class="close" onclick="closeDetail()">×</button>
+  <div id="detailBody"></div>
+</div>
+
+<footer>
+  <span>Generat din modelul IFC <b>NZEB_Expo_2026_Romexpo_B2.ifc</b> · buildingSMART România · stand F15</span>
+  <span class="fslogan">in openBIM we trust.</span>
+</footer>
+
+<script>__THREE__</script>
+<script>__ORBIT__</script>
+<script>
+const DATA = __DATA__;
+const GEO = __GEO__;
+
+/* ---------- palettes ---------- */
+const BS = ['#3da4b0','#962999','#ec124e','#7d2e9e','#2556ac','#5dd39e','#f2a33c',
+            '#6fd3e8','#e873ae','#f0716f','#a86fd6','#7da4e8','#9be0c0','#f3c57c',
+            '#4a90c9','#b04a8f','#c9554f','#8e54b5','#5b7fc2','#67b893','#d9a14e',
+            '#86c6dd','#d490b8','#c98a86'];
+const ZC = {'ZONA 1':'#3da4b0','ZONA 2':'#2556ac','ZONA 3':'#962999','ZONA 4':'#7d2e9e',
+            'ZONA 5':'#ec124e','ZONA 6':'#f2a33c','ZONA 7':'#5dd39e'};
+const cats = [...new Set(DATA.stands.map(s=>s.cat))].sort();
+const catColor = {}; cats.forEach((c,i)=>catColor[c]=BS[i%BS.length]);
+const zones = [...new Set(DATA.stands.map(s=>s.zone))].sort();
+
+/* ---------- state ---------- */
+let F = {q:'', zones:new Set(), cats:new Set(), loc:'all', web:false, mode:'ifc', view:'3d', sel:null,
+         sort:'id', asc:true};
+
+/* ---------- filtering ---------- */
+function filtered(){
+  const q = F.q.toLowerCase();
+  return DATA.stands.filter(s=>{
+    if(q && !(s.name.toLowerCase().includes(q) || (s.id||'').toLowerCase().includes(q))) return false;
+    if(F.zones.size && !F.zones.has(s.zone)) return false;
+    if(F.cats.size && !F.cats.has(s.cat)) return false;
+    if(F.loc==='in' && !s.indoor) return false;
+    if(F.loc==='out' && s.indoor) return false;
+    if(F.web && !s.website) return false;
+    return true;
+  });
+}
+
+/* ---------- KPIs ---------- */
+function renderKpis(list){
+  document.getElementById('kStands').textContent = list.length;
+  document.getElementById('kArea').textContent = Math.round(list.reduce((a,s)=>a+(s.area||0),0)).toLocaleString('ro');
+  document.getElementById('kCats').textContent = new Set(list.map(s=>s.cat)).size;
+  const big = list.slice().sort((a,b)=>b.area-a.area)[0];
+  document.getElementById('kBig').textContent = big ? big.name.slice(0,16)+(big.name.length>16?'…':'') : '–';
+  document.getElementById('kBig').title = big ? `${big.name} (${big.area} mp)` : '';
+  document.getElementById('kWeb').textContent = list.filter(s=>s.website).length;
+}
+
+/* ---------- map ---------- */
+const svgNS='http://www.w3.org/2000/svg';
+const map=document.getElementById('map'), wrap=document.getElementById('mapwrap'), tip=document.getElementById('tooltip');
+const ext = (()=>{ // extents over everything
+  let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
+  const all=[...DATA.stands, DATA.pavilion, ...DATA.areas];
+  all.forEach(o=>{x0=Math.min(x0,o.x); y0=Math.min(y0,o.y); x1=Math.max(x1,o.x+o.w); y1=Math.max(y1,o.y+o.d);});
+  return {x0:x0-3, y0:y0-3, x1:x1+3, y1:y1+3};
+})();
+const fy = y => ext.y1 - y + ext.y0;  // flip Y (plan -> screen)
+let view = {x:ext.x0, y:ext.y0, w:ext.x1-ext.x0, h:ext.y1-ext.y0};
+function applyView(){ map.setAttribute('viewBox', `${view.x} ${view.y} ${view.w} ${view.h}`); }
+
+function buildMap(){
+  map.innerHTML='';
+  const p = DATA.pavilion;
+  const hall=document.createElementNS(svgNS,'rect');
+  hall.setAttribute('x',p.x); hall.setAttribute('y',fy(p.y+p.d));
+  hall.setAttribute('width',p.w); hall.setAttribute('height',p.d);
+  hall.setAttribute('fill','#131c40'); hall.setAttribute('stroke','#3b4d8f'); hall.setAttribute('stroke-width','.6');
+  map.appendChild(hall);
+  const hl=document.createElementNS(svgNS,'text');
+  hl.setAttribute('x',p.x+1.5); hl.setAttribute('y',fy(p.y+p.d)+3.4);
+  hl.setAttribute('fill','#56689f'); hl.setAttribute('font-size','2.6'); hl.textContent='PAVILIONUL B2';
+  map.appendChild(hl);
+
+  DATA.areas.forEach(a=>{
+    const r=document.createElementNS(svgNS,'rect');
+    r.setAttribute('x',a.x); r.setAttribute('y',fy(a.y+a.d));
+    r.setAttribute('width',a.w); r.setAttribute('height',a.d);
+    r.setAttribute('fill','#7d2e9e'); r.setAttribute('opacity','.18');
+    r.setAttribute('stroke','#7d2e9e'); r.setAttribute('stroke-width','.25'); r.setAttribute('stroke-dasharray','1 .7');
+    map.appendChild(r);
+    const t=document.createElementNS(svgNS,'text');
+    t.setAttribute('x',a.x+a.w/2); t.setAttribute('y',fy(a.y+a.d)+a.d/2);
+    t.setAttribute('fill','#8d7bb8'); t.setAttribute('font-size','1.7'); t.setAttribute('text-anchor','middle');
+    t.textContent=a.name.length>26?a.name.slice(0,25)+'…':a.name;
+    map.appendChild(t);
+  });
+
+  DATA.stands.forEach(s=>{
+    const r=document.createElementNS(svgNS,'rect');
+    r.setAttribute('x',s.x); r.setAttribute('y',fy(s.y+s.d));
+    r.setAttribute('width',s.w); r.setAttribute('height',s.d);
+    r.classList.add('stand'); r.dataset.guid=s.guid;
+    r.addEventListener('mousemove',e=>showTip(e,s));
+    r.addEventListener('mouseleave',()=>tip.style.display='none');
+    r.addEventListener('click',()=>select(s, true));
+    map.appendChild(r); s._el=r;
+    if(s.w>4.5 && s.d>2.2){
+      const t=document.createElementNS(svgNS,'text');
+      t.setAttribute('x',s.x+s.w/2); t.setAttribute('y',fy(s.y+s.d)+s.d/2+.55);
+      t.setAttribute('fill','#0a1228'); t.setAttribute('font-size',Math.min(1.6,s.d/2.6));
+      t.setAttribute('text-anchor','middle'); t.setAttribute('font-weight','600');
+      t.textContent=s.name.slice(0,Math.floor(s.w/0.95));
+      map.appendChild(t); s._lbl=t;
+    }
+    if(s.f15){
+      const star=document.createElementNS(svgNS,'text');
+      star.setAttribute('x',s.x+s.w/2); star.setAttribute('y',fy(s.y+s.d)-0.8);
+      star.setAttribute('fill','#29abe2'); star.setAttribute('font-size','2.6'); star.setAttribute('text-anchor','middle');
+      star.setAttribute('font-weight','700');
+      star.textContent='▼ buildingSMART RO';
+      map.appendChild(star);
+    }
+  });
+  applyView();
+}
+function showTip(e,s){
+  const rc=wrap.getBoundingClientRect();
+  tip.style.display='block';
+  tip.style.left=Math.min(e.clientX-rc.left+14, rc.width-270)+'px';
+  tip.style.top=(e.clientY-rc.top+12)+'px';
+  tip.innerHTML=`<b>${s.id?s.id+' · ':''}${s.name}</b><br>${s.cat}<br>${s.zone} · ${s.area} mp${s.website?'<br>'+s.website:''}`;
+}
+function paintMap(list){
+  const ok=new Set(list.map(s=>s.guid));
+  DATA.stands.forEach(s=>{
+    const c = F.mode==='zone' ? (ZC[s.zone]||'#888') : (catColor[s.cat]||'#888'); // 2D: 'ifc' cade pe domenii
+    s._el.setAttribute('fill',c);
+    s._el.classList.toggle('dim', !ok.has(s.guid));
+    s._el.classList.toggle('sel', F.sel===s.guid);
+    if(s._lbl) s._lbl.style.opacity = ok.has(s.guid)?1:.08;
+  });
+}
+/* zoom & pan */
+wrap.addEventListener('wheel',e=>{
+  if(F.view==='3d') return;
+  e.preventDefault();
+  const rc=wrap.getBoundingClientRect();
+  const mx=view.x+(e.clientX-rc.left)/rc.width*view.w;
+  const my=view.y+(e.clientY-rc.top)/rc.height*view.h;
+  const k=e.deltaY>0?1.18:1/1.18;
+  view.w*=k; view.h*=k;
+  view.x=mx-(mx-view.x)*k; view.y=my-(my-view.y)*k;
+  applyView();
+},{passive:false});
+let drag=null;
+wrap.addEventListener('mousedown',e=>{if(F.view==='3d')return; drag={x:e.clientX,y:e.clientY,vx:view.x,vy:view.y};});
+window.addEventListener('mousemove',e=>{
+  if(!drag) return;
+  const rc=wrap.getBoundingClientRect();
+  view.x=drag.vx-(e.clientX-drag.x)/rc.width*view.w;
+  view.y=drag.vy-(e.clientY-drag.y)/rc.height*view.h;
+  applyView();
+});
+window.addEventListener('mouseup',()=>drag=null);
+
+/* ================= 3D VIEW (geometrie IFC reala) ================= */
+let renderer, scene, camera, controls, root, raycaster, pointer;
+const meshesByGuid = {};          // product guid -> mesh
+const standMeshes = {};           // stand guid -> [meshes]
+const layerGroups = {building:null, roof:null, space:null};
+const ifcToWorld = (x,y,z)=>new THREE.Vector3(x, z, -y); // z-up -> y-up
+
+function init3D(){
+  renderer = new THREE.WebGLRenderer({antialias:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  renderer.domElement.style.cssText='position:absolute;inset:0';
+  wrap.insertBefore(renderer.domElement, wrap.firstChild);
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0e1530);
+  scene.fog = new THREE.Fog(0x0e1530, 350, 900);
+
+  const cx = (ext.x0+ext.x1)/2, cy = (ext.y0+ext.y1)/2;   // centrul intregii scene
+  camera = new THREE.PerspectiveCamera(50, 2, 0.1, 2000);
+  camera.position.set(cx, 105, -cy + 120);                 // dinspre sud, elevat
+  controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.target.copy(ifcToWorld(cx, cy, 0));
+  controls.maxPolarAngle = Math.PI/2 - 0.02;
+  controls.addEventListener('change', requestRender);
+  controls.update();   // aplica orientarea initiala (fara bucla rAF)
+
+  scene.add(new THREE.HemisphereLight(0xbac4ff, 0x1a2040, 0.95));
+  const sun = new THREE.DirectionalLight(0xffffff, 0.75);
+  sun.position.set(150, 220, -60);
+  scene.add(sun);
+
+  // teren
+  const ground = new THREE.Mesh(
+    new THREE.PlaneGeometry(1200, 800),
+    new THREE.MeshLambertMaterial({color:0x101a3c}));
+  ground.rotation.x = -Math.PI/2; ground.position.set(cx, -0.25, -cy);
+  scene.add(ground);
+
+  root = new THREE.Group();
+  root.rotation.x = -Math.PI/2;   // IFC z-up -> three y-up
+  scene.add(root);
+  ['building','roof','space'].forEach(k=>{ layerGroups[k]=new THREE.Group(); root.add(layerGroups[k]); });
+  layerGroups.roof.visible = false;
+  const standsGroup = new THREE.Group(); root.add(standsGroup);
+
+  GEO.products.forEach(prod=>{
+    let geom = new THREE.BufferGeometry();
+    geom.setAttribute('position', new THREE.Float32BufferAttribute(prod.v, 3));
+    // grupeaza triunghiurile pe material (index reordonat)
+    const byMat = {};
+    for(let t=0; t<prod.fm.length; t++) (byMat[prod.fm[t]] ??= []).push(t);
+    const order = [], groups = [];
+    let start = 0;
+    Object.keys(byMat).forEach(mi=>{
+      const tris = byMat[mi];
+      tris.forEach(t=>order.push(prod.f[t*3], prod.f[t*3+1], prod.f[t*3+2]));
+      groups.push([start, tris.length*3, +mi]); start += tris.length*3;
+    });
+    geom.setIndex(order);
+    groups.forEach(g=>geom.addGroup(g[0], g[1], g[2]));
+    geom = geom.toNonIndexed();       // normale plane (fete drepte)
+    geom.computeVertexNormals();
+    const mats = prod.mats.map(m=>new THREE.MeshLambertMaterial({
+      color:new THREE.Color(m[0], m[1], m[2]),
+      transparent:true, opacity:1-m[3],
+      depthWrite:m[3] < 0.4,
+      side:THREE.DoubleSide,
+    }));
+    mats.forEach((mm,i)=>{ mm.userData={o:1-prod.mats[i][3], c:mm.color.clone()}; });
+    const mesh = new THREE.Mesh(geom, mats);
+    mesh.userData = {guid:prod.guid, kind:prod.kind, stand:prod.stand};
+    meshesByGuid[prod.guid] = mesh;
+    if(prod.kind==='stand'){
+      (standMeshes[prod.stand] ??= []).push(mesh);
+      standsGroup.add(mesh);
+    } else layerGroups[prod.kind].add(mesh);
+  });
+
+  // marker F15 (sprite buildingSMART RO)
+  const f15 = DATA.stands.find(s=>s.f15);
+  if(f15){
+    const cv = document.createElement('canvas'); cv.width=512; cv.height=128;
+    const cx2 = cv.getContext('2d');
+    cx2.fillStyle='rgba(6,18,43,.92)'; cx2.beginPath();
+    cx2.roundRect(4,4,504,86,18); cx2.fill();
+    cx2.strokeStyle='#29abe2'; cx2.lineWidth=5; cx2.stroke();
+    cx2.fillStyle='#29abe2'; cx2.font='bold 52px Segoe UI';
+    cx2.textAlign='center'; cx2.fillText('▼ buildingSMART RO', 256, 64);
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(cv), depthTest:false}));
+    sp.scale.set(16, 4, 1); sp.renderOrder = 999;
+    sp.position.copy(ifcToWorld(f15.x+f15.w/2, f15.y+f15.d/2, 7.2));
+    scene.add(sp); sp.userData.f15marker = true;
+  }
+
+  raycaster = new THREE.Raycaster(); pointer = new THREE.Vector2();
+  renderer.domElement.addEventListener('pointermove', on3DMove);
+  renderer.domElement.addEventListener('pointerdown', e=>{ e._px=e.clientX; e._py=e.clientY; window._p3=[e.clientX,e.clientY]; });
+  renderer.domElement.addEventListener('pointerup', e=>{
+    if(window._p3 && Math.hypot(e.clientX-window._p3[0], e.clientY-window._p3[1])<5) on3DClick(e);
+  });
+  resize3D();
+  window.addEventListener('resize', resize3D);
+  requestRender();
+}
+function requestRender(){
+  if(!renderer || renderer._pend) return;
+  renderer._pend = true;
+  const go = ()=>{ if(!renderer._pend) return; renderer._pend = false; renderer.render(scene, camera); };
+  requestAnimationFrame(go);
+  setTimeout(go, 60);   // fallback pentru tab-uri cu rAF throttled
+}
+function resize3D(){
+  const r = wrap.getBoundingClientRect();
+  renderer.setSize(r.width, r.height);
+  camera.aspect = r.width/r.height; camera.updateProjectionMatrix();
+  requestRender();
+}
+function pick(e){
+  const r = wrap.getBoundingClientRect();
+  pointer.set(((e.clientX-r.left)/r.width)*2-1, -((e.clientY-r.top)/r.height)*2+1);
+  raycaster.setFromCamera(pointer, camera);
+  const hits = raycaster.intersectObjects(Object.values(meshesByGuid).filter(m=>m.visible && m.userData.kind==='stand'));
+  for(const h of hits){
+    const sg = h.object.userData.stand;
+    const s = DATA.stands.find(x=>x.guid===sg);
+    if(s && !h.object.userData._dim) return s;
+  }
+  return null;
+}
+function on3DMove(e){
+  if(F.view!=='3d') return;
+  const s = pick(e);
+  if(s){ showTip(e, s); renderer.domElement.style.cursor='pointer'; }
+  else { tip.style.display='none'; renderer.domElement.style.cursor=''; }
+}
+function on3DClick(e){
+  if(F.view!=='3d') return;
+  const s = pick(e);
+  if(s) select(s, true);
+}
+function paint3D(list){
+  if(!renderer) return;
+  const ok = new Set(list.map(s=>s.guid));
+  Object.entries(standMeshes).forEach(([sg, meshes])=>{
+    const s = DATA.stands.find(x=>x.guid===sg);
+    if(!s) return;   // garda: geometrie fara inregistrare in date
+    const inc = ok.has(sg), sel = F.sel===sg;
+    const ovr = F.mode==='cat' ? catColor[s.cat] : F.mode==='zone' ? ZC[s.zone] : null;
+    meshes.forEach(m=>{
+      m.userData._dim = !inc;
+      m.material.forEach(mm=>{
+        mm.opacity = inc ? mm.userData.o : 0.05;
+        mm.depthWrite = inc && mm.userData.o > 0.6;
+        if(ovr) mm.color.set(ovr); else mm.color.copy(mm.userData.c);
+        mm.emissive = mm.emissive || new THREE.Color(0,0,0);
+        mm.emissive.set(sel ? 0x1c4d68 : 0x000000);
+      });
+    });
+  });
+  renderNow();   // randare directa, sincrona — filtrele se vad imediat
+}
+function renderNow(){
+  if(!renderer) return;
+  renderer._pend = false;
+  renderer.render(scene, camera);
+}
+function flyTo(s){
+  if(!renderer || F.view!=='3d') return;
+  const t = ifcToWorld(s.x+s.w/2, s.y+s.d/2, 1);
+  controls.target.copy(t);
+  const dir = new THREE.Vector3(11, 8, 11);
+  camera.position.copy(t).add(dir);
+  controls.update();
+  renderNow();
+}
+/* zoom la standul buildingSMART Romania (F15) — folosit de butonul din maphead si de cardul din sidebar */
+function gotoBsro(){
+  const s = DATA.stands.find(x=>x.f15);
+  if(!s) return;
+  if(F.view==='2d'){
+    const aspect = wrap.getBoundingClientRect().width / wrap.getBoundingClientRect().height;
+    view.w = 36; view.h = 36/aspect;
+    view.x = s.x + s.w/2 - view.w/2;
+    view.y = fy(s.y + s.d) + s.d/2 - view.h/2;
+    applyView();
+  }
+  select(s, true, true);
+}
+document.getElementById('gotoBsroBtn').onclick = gotoBsro;
+/* view & layer switches */
+document.querySelectorAll('#viewChips .chip').forEach(c=>{
+  c.onclick = ()=>{
+    document.querySelectorAll('#viewChips .chip').forEach(x=>x.classList.remove('on'));
+    c.classList.add('on'); F.view = c.dataset.view;
+    const is3d = F.view==='3d';
+    renderer.domElement.style.display = is3d ? '' : 'none';
+    map.style.display = is3d ? 'none' : '';
+    document.getElementById('mapHint').textContent = is3d
+      ? 'drag = orbită · click dr. = pan · scroll = zoom · click = detalii'
+      : 'scroll = zoom · drag = pan · click = detalii';
+    tip.style.display='none';
+    requestRender();
+  };
+});
+document.querySelectorAll('#layerChips .chip').forEach(c=>{
+  c.onclick = ()=>{
+    c.classList.toggle('on');
+    const on = c.classList.contains('on'), k = c.dataset.layer;
+    if(layerGroups[k]) layerGroups[k].visible = on;
+    if(k==='space') map.querySelectorAll('rect[stroke-dasharray]').forEach(r=>r.style.display = on?'':'none');
+    requestRender();
+  };
+});
+
+/* ---------- bars ---------- */
+function renderBars(list){
+  const counts={};
+  list.forEach(s=>counts[s.cat]=(counts[s.cat]||0)+1);
+  const rows=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+  const mx=rows.length?rows[0][1]:1;
+  document.getElementById('barChart').innerHTML = rows.map(([c,n])=>`
+    <div class="row" data-cat="${c.replace(/"/g,'&quot;')}">
+      <div class="lab" title="${c}">${c}</div>
+      <div><div class="bar" style="width:${(n/mx*100)}%;background:${catColor[c]}"></div></div>
+      <div>${n}</div>
+    </div>`).join('');
+  document.querySelectorAll('#barChart .row').forEach(r=>{
+    r.onclick=()=>{ toggleCat(r.dataset.cat); };
+  });
+}
+
+/* ---------- table ---------- */
+function renderTable(list){
+  const dir=F.asc?1:-1, k=F.sort;
+  const sorted=list.slice().sort((a,b)=>{
+    const av=a[k]??'', bv=b[k]??'';
+    return (typeof av==='number' ? av-bv : String(av).localeCompare(String(bv)))*dir;
+  });
+  document.getElementById('tbody').innerHTML = sorted.map(s=>`
+    <tr data-guid="${s.guid}" class="${F.sel===s.guid?'sel':''}">
+      <td>${s.id||'–'}${s.f15?'<span class="badge-f15">bSRO</span>':''}</td>
+      <td>${s.name}</td><td>${s.zone.replace('ZONA ','Z')}</td>
+      <td><span style="color:${catColor[s.cat]}">●</span> ${s.cat.length>34?s.cat.slice(0,33)+'…':s.cat}</td>
+      <td>${s.area}</td>
+      <td>${s.website?`<a href="${s.website}" target="_blank" rel="noopener">link</a>`:''}</td>
+    </tr>`).join('');
+  document.querySelectorAll('#tbody tr').forEach(tr=>{
+    tr.addEventListener('click',e=>{
+      if(e.target.tagName==='A') return;
+      const s=DATA.stands.find(x=>x.guid===tr.dataset.guid);
+      select(s, true, true);
+    });
+  });
+}
+document.querySelectorAll('th[data-s]').forEach(th=>{
+  th.onclick=()=>{ const k=th.dataset.s;
+    if(F.sort===k) F.asc=!F.asc; else {F.sort=k; F.asc=true;}
+    update(); };
+});
+
+/* ---------- detail drawer ---------- */
+function select(s, open, fly){
+  F.sel = s ? s.guid : null;
+  if(s && fly) flyTo(s);
+  if(s && open){
+    const b=document.getElementById('detailBody');
+    b.innerHTML=`
+      <h2>${s.name}${s.f15?'<span class="badge-f15">buildingSMART RO</span>':''}</h2>
+      <div class="sub">${s.id?('Stand '+s.id+' · '):''}${s.zone}</div>
+      <div class="prop"><span class="k">Domeniu</span><span class="v">${s.cat}</span></div>
+      <div class="prop"><span class="k">Suprafață</span><span class="v">${s.area} mp</span></div>
+      <div class="prop"><span class="k">Amplasare</span><span class="v">${s.indoor?'Interior (Pavilion B2)':'Exterior'}</span></div>
+      <div class="prop"><span class="k">Poziție (m)</span><span class="v">x ${s.x} · y ${s.y} · ${s.w}×${s.d}</span></div>
+      ${s.website?`<div class="prop"><span class="k">Website</span><span class="v"><a href="${s.website}" target="_blank" rel="noopener">${s.website.replace(/^https?:\/\/(www\.)?/,'').replace(/\/$/,'')}</a></span></div>`:''}
+      ${s.designer?`<div class="prop"><span class="k">Proiectant stand</span><span class="v">${s.designer}</span></div>`:''}
+      ${s.floor?`<div class="prop"><span class="k">Finisaj pardoseală</span><span class="v">${s.floor}</span></div>`:''}
+      ${s.elements?`<div class="els"><h4>Elemente stand (${s.elements.length})</h4><ul>${s.elements.map(e=>`<li>${e}</li>`).join('')}</ul></div>`:''}
+    `;
+    document.getElementById('detail').classList.add('open');
+  }
+  update(false);
+}
+function closeDetail(){
+  document.getElementById('detail').classList.remove('open');
+  F.sel=null; update(false);
+}
+
+/* ---------- filter widgets ---------- */
+const zoneChips=document.getElementById('zoneChips');
+zones.forEach(z=>{
+  const c=document.createElement('span'); c.className='chip'; c.textContent=z.replace('ZONA ','Zona ');
+  c.onclick=()=>{ F.zones.has(z)?F.zones.delete(z):F.zones.add(z); c.classList.toggle('on'); update(); };
+  zoneChips.appendChild(c);
+});
+function buildCatList(){
+  const counts={}; DATA.stands.forEach(s=>counts[s.cat]=(counts[s.cat]||0)+1);
+  const el=document.getElementById('catList');
+  el.innerHTML='';
+  cats.slice().sort((a,b)=>counts[b]-counts[a]).forEach(c=>{
+    const d=document.createElement('div');
+    d.className='catrow'+(F.cats.has(c)?' on':''); d.dataset.cat=c;
+    d.innerHTML=`<span class="dot" style="background:${catColor[c]}"></span><span>${c.length>30?c.slice(0,29)+'…':c}</span><span class="n">${counts[c]}</span>`;
+    d.title=c;
+    d.onclick=()=>toggleCat(c);
+    el.appendChild(d);
+  });
+}
+function toggleCat(c){
+  F.cats.has(c)?F.cats.delete(c):F.cats.add(c);
+  document.querySelectorAll('.catrow').forEach(r=>r.classList.toggle('on', F.cats.has(r.dataset.cat)));
+  update();
+}
+document.getElementById('search').addEventListener('input',e=>{F.q=e.target.value; update();});
+document.querySelectorAll('#locChips .chip').forEach(c=>{
+  c.onclick=()=>{ document.querySelectorAll('#locChips .chip').forEach(x=>x.classList.remove('on'));
+    c.classList.add('on'); F.loc=c.dataset.loc; update(); };
+});
+document.getElementById('webChip').onclick=function(){ F.web=!F.web; this.classList.toggle('on'); update(); };
+document.querySelectorAll('.mode .chip').forEach(c=>{
+  c.onclick=()=>{ document.querySelectorAll('.mode .chip').forEach(x=>x.classList.remove('on'));
+    c.classList.add('on'); F.mode=c.dataset.mode; update(false); };
+});
+document.getElementById('resetBtn').onclick=()=>{
+  F={q:'',zones:new Set(),cats:new Set(),loc:'all',web:false,mode:F.mode,view:F.view,sel:null,sort:'id',asc:true};
+  document.getElementById('search').value='';
+  document.querySelectorAll('#zoneChips .chip').forEach(c=>c.classList.remove('on'));
+  document.querySelectorAll('#locChips .chip').forEach(c=>c.classList.toggle('on',c.dataset.loc==='all'));
+  document.getElementById('webChip').classList.remove('on');
+  document.querySelectorAll('.catrow').forEach(r=>r.classList.remove('on'));
+  closeDetail(); update();
+};
+
+/* ---------- main update ---------- */
+function update(rebuildBars=true){
+  const list=filtered();
+  renderKpis(list);
+  paintMap(list);
+  paint3D(list);
+  if(rebuildBars!==false) renderBars(list);
+  renderTable(list);
+}
+buildMap(); init3D(); buildCatList(); update();
+</script>
+</body>
+</html>

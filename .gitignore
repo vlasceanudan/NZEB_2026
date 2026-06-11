@@ -1,0 +1,12 @@
+# randari ale planurilor PDF (documente interne / BIT Arhitectura) - nu se publica
+nzeb_plan/bs_stand/
+nzeb_plan/page*.png
+nzeb_plan/page*.txt
+
+# fisiere temporare de verificare
+nzeb_plan/preview3d.png
+nzeb_plan/_cap*
+nzeb_plan/upload_server.py
+
+__pycache__/
+*.pyc
