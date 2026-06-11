@@ -302,6 +302,10 @@ function buildMap(){
     r.setAttribute('width',a.w); r.setAttribute('height',a.d);
     r.setAttribute('fill','#7d2e9e'); r.setAttribute('opacity','.18');
     r.setAttribute('stroke','#7d2e9e'); r.setAttribute('stroke-width','.25'); r.setAttribute('stroke-dasharray','1 .7');
+    r.style.cursor='pointer';
+    r.addEventListener('mousemove',e=>showAreaTip(e,a));
+    r.addEventListener('mouseleave',()=>tip.style.display='none');
+    r.addEventListener('click',()=>selectArea(a));
     map.appendChild(r);
     const t=document.createElementNS(svgNS,'text');
     t.setAttribute('x',a.x+a.w/2); t.setAttribute('y',fy(a.y+a.d)+a.d/2);
@@ -344,6 +348,24 @@ function showTip(e,s){
   tip.style.left=Math.min(e.clientX-rc.left+14, rc.width-270)+'px';
   tip.style.top=(e.clientY-rc.top+12)+'px';
   tip.innerHTML=`<b>${s.id?s.id+' · ':''}${s.name}</b><br>${s.cat}<br>${s.zone} · ${s.area} mp${s.website?'<br>'+s.website:''}`;
+}
+function showAreaTip(e,a){
+  const rc=wrap.getBoundingClientRect();
+  tip.style.display='block';
+  tip.style.left=Math.min(e.clientX-rc.left+14, rc.width-270)+'px';
+  tip.style.top=(e.clientY-rc.top+12)+'px';
+  tip.innerHTML=`<b>${a.name}</b><br>Zonă specială · ${a.area} mp`;
+}
+function selectArea(a){
+  const b=document.getElementById('detailBody');
+  b.innerHTML=`
+    <h2>${a.name}</h2>
+    <div class="sub">Zonă specială a evenimentului</div>
+    <div class="prop"><span class="k">Tip element</span><span class="v">IfcSpace — zonă funcțională</span></div>
+    <div class="prop"><span class="k">Suprafață</span><span class="v">${a.area} mp</span></div>
+    <div class="prop"><span class="k">Poziție (m)</span><span class="v">x ${a.x} · y ${a.y} · ${a.w}×${a.d}</span></div>
+    <div class="prop"><span class="k">Eveniment</span><span class="v">NZEB Expo București 2026</span></div>`;
+  document.getElementById('detail').classList.add('open');
 }
 function paintMap(list){
   const ok=new Set(list.map(s=>s.guid));
@@ -498,24 +520,37 @@ function pick(e){
   const r = wrap.getBoundingClientRect();
   pointer.set(((e.clientX-r.left)/r.width)*2-1, -((e.clientY-r.top)/r.height)*2+1);
   raycaster.setFromCamera(pointer, camera);
-  const hits = raycaster.intersectObjects(Object.values(meshesByGuid).filter(m=>m.visible && m.userData.kind==='stand'));
+  const pickables = Object.values(meshesByGuid).filter(m=>{
+    if(m.userData.kind==='stand') return m.visible;
+    if(m.userData.kind==='space') return layerGroups.space.visible;
+    return false;
+  });
+  const hits = raycaster.intersectObjects(pickables);
+  let area = null;
   for(const h of hits){
-    const sg = h.object.userData.stand;
-    const s = DATA.stands.find(x=>x.guid===sg);
-    if(s && !h.object.userData._dim) return s;
+    if(h.object.userData.kind==='stand'){
+      const s = DATA.stands.find(x=>x.guid===h.object.userData.stand);
+      if(s && !h.object.userData._dim) return {kind:'stand', s};   // standurile au prioritate
+    } else if(!area){
+      area = DATA.areas.find(a=>a.guid===h.object.userData.guid) || null;
+    }
   }
-  return null;
+  return area ? {kind:'area', a:area} : null;
 }
 function on3DMove(e){
   if(F.view!=='3d') return;
-  const s = pick(e);
-  if(s){ showTip(e, s); renderer.domElement.style.cursor='pointer'; }
+  const hit = pick(e);
+  if(hit){
+    if(hit.kind==='stand') showTip(e, hit.s); else showAreaTip(e, hit.a);
+    renderer.domElement.style.cursor='pointer';
+  }
   else { tip.style.display='none'; renderer.domElement.style.cursor=''; }
 }
 function on3DClick(e){
   if(F.view!=='3d') return;
-  const s = pick(e);
-  if(s) select(s, true);
+  const hit = pick(e);
+  if(!hit) return;
+  if(hit.kind==='stand') select(hit.s, true); else selectArea(hit.a);
 }
 function paint3D(list){
   if(!renderer) return;

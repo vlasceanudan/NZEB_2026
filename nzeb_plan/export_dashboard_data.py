@@ -36,7 +36,8 @@ for el in g.by_type('IfcProduct'):
 
     if 'NZEB_AreaInfo' in psets and bb:
         ai = psets['NZEB_AreaInfo']
-        areas.append({'name': ai.get('AreaName', name), 'area': ai.get('AreaSqm', 0),
+        areas.append({'guid': el.GlobalId,
+                      'name': ai.get('AreaName', name), 'area': ai.get('AreaSqm', 0),
                       'x': round(bb[0],2), 'y': round(bb[1],2),
                       'w': round(bb[2]-bb[0],2), 'd': round(bb[3]-bb[1],2)})
         continue
