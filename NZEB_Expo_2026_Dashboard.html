@@ -61,9 +61,6 @@
   .maphead{display:flex; align-items:center; gap:10px; margin-bottom:8px}
   .maphead b{font-size:14px}
   .maphead .mode{margin-left:auto; display:flex; gap:5px}
-  #gotoBsroBtn{padding:5px 12px; border-radius:999px; border:none; cursor:pointer; font-size:12px; font-weight:700;
-    background:linear-gradient(90deg,var(--bs-cyan),var(--bs-magenta)); color:#fff; letter-spacing:.2px}
-  #gotoBsroBtn:hover{filter:brightness(1.18)}
   #mapwrap{position:relative; overflow:hidden; border-radius:8px; background:var(--bs-navy); border:1px solid var(--bs-line); height:460px; cursor:grab}
   #mapwrap:active{cursor:grabbing}
   svg text{pointer-events:none}
@@ -72,13 +69,8 @@
   .stand.sel{stroke:#fff; stroke-width:.7}
   #tooltip{position:absolute; pointer-events:none; background:#06122b; border:1px solid var(--bs-cyan); border-radius:7px; padding:7px 11px; font-size:12px; display:none; z-index:20; max-width:260px; box-shadow:0 4px 18px rgba(0,0,0,.5)}
   #tooltip b{color:var(--bs-cyan)}
-  .bottom{display:grid; grid-template-columns:1.05fr 1.6fr; gap:14px; margin-top:14px; align-items:stretch}
+  .bottom{margin-top:14px}
   .bottom .card{display:flex; flex-direction:column; height:520px; min-height:0}
-  #barChart{flex:1; overflow-y:auto; min-height:0; padding-right:4px}
-  .bars .row{display:grid; grid-template-columns:170px 1fr 34px; gap:8px; align-items:center; font-size:11.5px; margin-bottom:4px; cursor:pointer; color:var(--bs-muted)}
-  .bars .row:hover{color:var(--bs-text)}
-  .bars .bar{height:13px; border-radius:3px; min-width:2px}
-  .bars .lab{overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:right}
   table{width:100%; border-collapse:collapse; font-size:12.5px}
   th{text-align:left; padding:7px 9px; color:var(--bs-muted); font-size:11px; text-transform:uppercase; letter-spacing:.5px; cursor:pointer; border-bottom:1px solid var(--bs-line); user-select:none; white-space:nowrap}
   th:hover{color:var(--bs-cyan)}
@@ -108,7 +100,7 @@
   footer .fslogan{color:var(--bs-cyan); font-style:italic}
   ::-webkit-scrollbar{width:9px; height:9px} ::-webkit-scrollbar-thumb{background:var(--bs-line); border-radius:5px}
   @media (max-width:1100px){ .layout{grid-template-columns:1fr} .side{position:static; max-height:none}
-    .kpis{grid-template-columns:repeat(2,1fr)} .bottom{grid-template-columns:1fr} }
+    .kpis{grid-template-columns:repeat(2,1fr)} }
 </style>
 </head>
 <body>
@@ -560,7 +552,6 @@
           <span class="chip on" data-view="3d">Vedere 3D</span>
           <span class="chip" data-view="2d">Plan 2D</span>
         </div>
-        <button id="gotoBsroBtn" title="Zboară la standul F15 - buildingSMART România">⌖ Zoom la buildingSMART RO</button>
         <div class="mode chips">
           <span class="chip on" data-mode="ifc">Culori: IFC</span>
           <span class="chip" data-mode="cat">Domenii</span>
@@ -578,11 +569,6 @@
     </div>
 
     <div class="bottom">
-      <div class="card bars">
-        <b style="font-size:14px">Expozanți pe domenii</b>
-        <div style="font-size:11px;color:var(--bs-muted);margin-bottom:10px">click pe un domeniu pentru filtrare</div>
-        <div id="barChart"></div>
-      </div>
       <div class="card">
         <b style="font-size:14px">Listă expozanți</b>
         <div class="tablewrap" style="margin-top:8px">
@@ -2057,7 +2043,6 @@ function gotoBsro(){
   }
   select(s, true, true);
 }
-document.getElementById('gotoBsroBtn').onclick = gotoBsro;
 /* view & layer switches */
 document.querySelectorAll('#viewChips .chip').forEach(c=>{
   c.onclick = ()=>{
@@ -2079,23 +2064,6 @@ document.querySelectorAll('#layerChips .chip').forEach(c=>{
     requestRender();
   };
 });
-
-/* ---------- bars ---------- */
-function renderBars(list){
-  const counts={};
-  list.forEach(s=>counts[s.cat]=(counts[s.cat]||0)+1);
-  const rows=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
-  const mx=rows.length?rows[0][1]:1;
-  document.getElementById('barChart').innerHTML = rows.map(([c,n])=>`
-    <div class="row" data-cat="${c.replace(/"/g,'&quot;')}">
-      <div class="lab" title="${c}">${c}</div>
-      <div><div class="bar" style="width:${(n/mx*100)}%;background:${catColor[c]}"></div></div>
-      <div>${n}</div>
-    </div>`).join('');
-  document.querySelectorAll('#barChart .row').forEach(r=>{
-    r.onclick=()=>{ toggleCat(r.dataset.cat); };
-  });
-}
 
 /* ---------- table ---------- */
 function renderTable(list){
@@ -2199,12 +2167,11 @@ document.getElementById('resetBtn').onclick=()=>{
 };
 
 /* ---------- main update ---------- */
-function update(rebuildBars=true){
+function update(){
   const list=filtered();
   renderKpis(list);
   paintMap(list);
   paint3D(list);
-  if(rebuildBars!==false) renderBars(list);
   renderTable(list);
 }
 buildMap(); init3D(); buildCatList(); update();
