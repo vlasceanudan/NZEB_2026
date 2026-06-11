@@ -314,6 +314,46 @@ classification = run('classification.add_classification', f, classification='NZE
 cat_refs = {}
 cat_products = {c: [] for c in CATS}
 
+# ---------------------------------------------------------------- stand orientation
+# spatele standului = latura cu vecin (alt stand lipit sau perete de pavilion);
+# deschiderea = spre aleea libera
+_rects = {id(s): conv(s['x0'], s['y0'], s['w'], s['h']) for s in stands_data}
+_OPP = {'N': 'S', 'S': 'N', 'E': 'W', 'W': 'E'}
+
+def _contact(a, b, gap=0.6, min_ov=0.8):
+    """laturile lui a pe care dreptunghiul b e lipit (cu lungimea de contact)"""
+    ax, ay, aw, ad = a; bx, by, bw, bd = b
+    out = {}
+    ovx = min(ax + aw, bx + bw) - max(ax, bx)
+    ovy = min(ay + ad, by + bd) - max(ay, by)
+    if ovx > min_ov:
+        if abs(by - (ay + ad)) < gap: out['N'] = ovx
+        if abs((by + bd) - ay) < gap: out['S'] = ovx
+    if ovy > min_ov:
+        if abs(bx - (ax + aw)) < gap: out['E'] = ovy
+        if abs((bx + bw) - ax) < gap: out['W'] = ovy
+    return out
+
+def stand_back(s):
+    a = _rects[id(s)]
+    contact = {'N': 0., 'S': 0., 'E': 0., 'W': 0.}
+    for o in stands_data:
+        if o is s:
+            continue
+        for dr, ln in _contact(a, _rects[id(o)]).items():
+            contact[dr] += ln
+    ax, ay, aw, ad = a
+    if s['x0'] <= 1450:  # doar in pavilion: peretii halei conteaza ca "vecin"
+        if abs(HY1 - (ay + ad)) < 1.2: contact['N'] += aw
+        if abs(ay - HY0) < 1.2:        contact['S'] += aw
+        if abs(HX1 - (ax + aw)) < 1.2: contact['E'] += ad
+        if abs(ax - HX0) < 1.2:        contact['W'] += ad
+    # ideal: vecin la spate si alee libera pe latura opusa
+    cands = [d for d in 'NSEW' if contact[d] > 0 and contact[_OPP[d]] == 0]
+    if not cands:
+        cands = [d for d in 'NSEW' if contact[d] > 0]
+    return max(cands, key=lambda d: contact[d]) if cands else 'N'
+
 # ---------------------------------------------------------------- generic stands
 csv_rows = []
 proxies = []
@@ -330,12 +370,27 @@ for s in stands_data:
 
     if not is_f15:
         wt = 0.08
+        back = stand_back(s)
         solids = [box(w, d, 0.10, st=ZONE_FLOOR.get(zone, ST['floor']))]
         if min(w, d) > 1.0:
-            solids.append(box(w, wt, 2.5, y=d - wt, z=0.10, st=ST['wall']))           # back wall
-            sd = min(d * 0.6, 4.0)
-            solids.append(box(wt, sd, 2.5, x=0,      y=d - sd, z=0.10, st=ST['wall']))  # side L
-            solids.append(box(wt, sd, 2.5, x=w - wt, y=d - sd, z=0.10, st=ST['wall']))  # side R
+            sd = min(d * 0.6, 4.0)   # adancime pereti laterali (back N/S)
+            sw = min(w * 0.6, 4.0)   # latime pereti laterali (back E/W)
+            if back == 'N':
+                solids += [box(w, wt, 2.5, y=d - wt, z=0.10, st=ST['wall']),
+                           box(wt, sd, 2.5, x=0,      y=d - sd, z=0.10, st=ST['wall']),
+                           box(wt, sd, 2.5, x=w - wt, y=d - sd, z=0.10, st=ST['wall'])]
+            elif back == 'S':
+                solids += [box(w, wt, 2.5, y=0, z=0.10, st=ST['wall']),
+                           box(wt, sd, 2.5, x=0,      y=0, z=0.10, st=ST['wall']),
+                           box(wt, sd, 2.5, x=w - wt, y=0, z=0.10, st=ST['wall'])]
+            elif back == 'E':
+                solids += [box(wt, d, 2.5, x=w - wt, z=0.10, st=ST['wall']),
+                           box(sw, wt, 2.5, x=w - sw, y=0,      z=0.10, st=ST['wall']),
+                           box(sw, wt, 2.5, x=w - sw, y=d - wt, z=0.10, st=ST['wall'])]
+            else:  # W
+                solids += [box(wt, d, 2.5, x=0, z=0.10, st=ST['wall']),
+                           box(sw, wt, 2.5, x=0, y=0,      z=0.10, st=ST['wall']),
+                           box(sw, wt, 2.5, x=0, y=d - wt, z=0.10, st=ST['wall'])]
         el = add_product('IfcBuildingElementProxy', label, x, y, solids, container, parent_pl,
                          description=f'Stand expozitional generic - {name}')
     else:
